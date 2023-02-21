@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>To do app</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+    <h1>To do app</h1>
+    <p>Add todo items and delete them as needed. Click the checkbox to mark an item as done. 
+    Double click an item to edit then click out to save.</p>
+<form id="todoForm">
+    <input type="text" name="todo" id="todo" placeholder="Enter a todo">
+    <input type="submit" value="Add" class="action">
+    <!-- add a clear all button -->
+    <button type="button" id="clear" class="action">Clear All</button>
+</form>
+<div class="list">
+<ul class = "list-group" id="todoList"></ul>
+</div>
+</div>
+</body>
+<script>
+let todoList = JSON.parse(localStorage.getItem('todoList')) || [];
+
+// render the list as checkboxes
+function renderList() {
+    const list = document.getElementById('todoList');
+    list.innerHTML = '';
+    todoList.forEach((todo, index) => {
+        list.innerHTML += `<li><input type="checkbox" id="todo${index}" ${todo.done ? 'checked' : ''}><label for="todo${index}">${todo.text}</label></li>`;
+    });
+}
+// add a delete button to the right of each todo item
+function renderList() {
+    const list = document.getElementById('todoList');
+    list.innerHTML = '';
+    todoList.forEach((todo, index) => {
+        list.innerHTML += `<li><input type="checkbox" id="todo${index}" ${todo.done ? 'checked' : ''}><label for="todo${index}">${todo.text}</label><button class="delete">Delete</button></li>`;
+    });
+}
+
+// when a user clicks on the delete button, remove the todo item from the list and save the updated list to local storage
+document.getElementById('todoList').addEventListener('click', (e) => {
+    if (e.target.tagName === 'BUTTON') {
+        const index = e.target.parentNode.id.replace('todo', '');
+        todoList.splice(index, 1);
+        renderList();
+    }
+});
+
+//show the list
+renderList();
+
+//add a new item to the list
+document.getElementById('todoForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const todo = document.getElementById('todo').value;
+    todoList.push({text: todo, done: false});
+    renderList();
+    document.getElementById('todoForm').reset();
+});
+//save the list to local storage
+window.addEventListener('beforeunload', () => {
+    localStorage.setItem('todoList', JSON.stringify(todoList));
+});
+
+//check off an item
+document.getElementById('todoList').addEventListener('change', (e) => {
+    const index = e.target.id.replace('todo', '');
+    todoList[index].done = e.target.checked;
+    renderList();
+});
+
+
+
+// when a user clicks cliks on a todo value, allow them to edit the value of the todo item by opening an input field and replacing the label with the input field and save the updated value to local storage
+document.getElementById('todoList').addEventListener('click', (e) => {
+    if (e.target.tagName === 'LABEL') {
+        const index = e.target.htmlFor.replace('todo', '');
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = todoList[index].text;
+        e.target.parentNode.replaceChild(input, e.target);
+        input.focus();
+        input.addEventListener('blur', () => {
+            todoList[index].text = input.value;
+            renderList();
+        });
+    }
+});
+
+// clear all button should open a confirm dialog box and if the user clicks ok, clear the list and save the updated list to local storage
+document.getElementById('clear').addEventListener('click', () => {
+    if (confirm('Are you sure you want to clear the list?')) {
+        todoList = [];
+        renderList();
+    }
+});
+
+// don't show the list if there are no items in the list
+function renderList() {
+    const list = document.getElementById('todoList');
+    list.innerHTML = '';
+    if (todoList.length) {
+        todoList.forEach((todo, index) => {
+            list.innerHTML += `<li><input type="checkbox" id="todo${index}" ${todo.done ? 'checked' : ''}><label for="todo${index}">${todo.text}</label><button class="delete">Delete</button></li>`;
+        });
+    } else {
+        list.innerHTML = '<li>No items in the list</li>';
+    }
+}
+
+</script>
+
+
+    
+
+
+
+</html>
